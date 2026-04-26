@@ -21,9 +21,15 @@ usuarios = {
     "marco": {"password": "5678", "oficina": "Logistica"}
 }
 
-# 🔹 CONEXIÓN GOOGLE SHEETS
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credenciales.json", scope)
+# 🔹 CONEXIÓN GOOGLE SHEETS (CORREGIDO PARA STREAMLIT CLOUD)
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+]
+
+creds_dict = st.secrets["gcp_service_account"]
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+
 client = gspread.authorize(creds)
 sheet = client.open("POI_RESULTADOS").sheet1
 
