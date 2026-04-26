@@ -21,7 +21,7 @@ usuarios = {
     "marco": {"password": "5678", "oficina": "Logistica"}
 }
 
-# 🔹 CONEXIÓN GOOGLE SHEETS (CORREGIDO PARA STREAMLIT CLOUD)
+# 🔹 CONEXIÓN GOOGLE SHEETS
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
@@ -33,7 +33,9 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key("18NuH5g4L8zp8VUHY2YJGuuegIL9xV73tGiF2hixtOsU").sheet1
 
-# 🔹 LOGIN
+# =========================
+# 🔐 LOGIN
+# =========================
 if "login" not in st.session_state:
     st.markdown("""
     <div style='text-align: center;'>
@@ -42,8 +44,6 @@ if "login" not in st.session_state:
         <h3>ELECTRO SUR ESTE S.A.A</h3>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("### 🔐 Iniciar acceso")
 
     usuario = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
@@ -57,29 +57,48 @@ if "login" not in st.session_state:
 
     st.stop()
 
-# 🔹 USUARIO
+# =========================
+# 🔹 USUARIO ACTIVO
+# =========================
 usuario = st.session_state["usuario"]
 oficina_usuario = usuarios[usuario]["oficina"]
 
-# 🔹 VERIFICAR SI YA CALIFICÓ
+# =========================
+# 🔴 BLOQUEO SI YA EVALUÓ (MEJORADO)
+# =========================
 data = sheet.get_all_records()
 df_res = pd.DataFrame(data)
 
-if not df_res.empty and usuario in df_res['USUARIO'].values:
-    nota = df_res[df_res['USUARIO'] == usuario]['NOTA_JEFE'].values[0]
-    st.success("✅ Evaluación ya realizada")
-    st.info(f"Tu nota final fue: {nota:.2f}%")
-    st.warning("Acceso bloqueado 🔒")
+if not df_res.empty:
+    df_res.columns = df_res.columns.str.upper().str.strip()
+
+    if "USUARIO" in df_res.columns and usuario in df_res["USUARIO"].values:
+        nota = df_res[df_res["USUARIO"] == usuario]["NOTA_JEFE"].values[0]
+
+        st.success("✅ Evaluación ya realizada")
+        st.info(f"Tu nota final fue: {nota:.2f}%")
+        st.warning("Acceso bloqueado 🔒")
+
+        st.session_state["evaluado"] = True
+        st.stop()
+
+# 🚫 BLOQUEO EXTRA POR SESIÓN
+if st.session_state.get("evaluado"):
+    st.warning("Ya realizaste la evaluación 🔒")
     st.stop()
 
+# =========================
 # 🔹 CARGAR DATOS BASE
+# =========================
 df = pd.read_excel("datos.xlsx")
 df.columns = df.columns.str.upper().str.strip()
 
 df_oficina = df[df['OFICINA'] == oficina_usuario]
 jefe = df_oficina['JEFE'].iloc[0]
 
-# 🔹 HEADER
+# =========================
+# HEADER
+# =========================
 st.markdown(f"""
 <div style='text-align: center;'>
     <h2>Bienvenido {usuario}</h2>
@@ -94,7 +113,9 @@ st.markdown("## 📊 Evaluación de trabajadores")
 
 promedios_trabajadores = []
 
-# 🔹 FORMULARIO
+# =========================
+# FORMULARIO
+# =========================
 for trabajador in trabajadores:
 
     st.markdown(f"""
@@ -120,13 +141,17 @@ for trabajador in trabajadores:
 
     promedios_trabajadores.append(promedio)
 
-# 🔥 FINALIZAR
+# =========================
+# FINALIZAR
+# =========================
 if st.button("FINALIZAR CALIFICACIÓN"):
 
     promedio_jefe = sum(promedios_trabajadores) / len(promedios_trabajadores)
 
-    # 🔹 GUARDAR EN GOOGLE SHEETS
+    # GUARDAR EN SHEETS
     sheet.append_row([usuario, oficina_usuario, promedio_jefe])
+
+    st.session_state["evaluado"] = True
 
     st.markdown("## 🎉 Evaluación completada")
     st.success("Gracias por tu calificación")
