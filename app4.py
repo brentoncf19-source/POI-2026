@@ -31,7 +31,7 @@ creds_dict = st.secrets["gcp_service_account"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 
 client = gspread.authorize(creds)
-sheet = client.open_by_key("1AbCDefGHIjkLMNOP123456789").sheet1
+sheet = client.open_by_key("18NuH5g4L8zp8VUHY2YJGuuegIL9xV73tGiF2hixtOsU").sheet1
 
 # 🔹 LOGIN
 if "login" not in st.session_state:
