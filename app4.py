@@ -17,7 +17,7 @@ h3 {text-align:center; color:#555;}
 # 🔐 USUARIOS
 usuarios = {
     "juan": {"password": "1234", "oficina": "Comercial"},
-    "maria": {"password": "abcd", "oficina": "Mantenimiento"},
+    "maria": {"password": "abcd", "oficina": "mantenimiento"},
     "marco": {"password": "5678", "oficina": "Logistica"}
 }
 
