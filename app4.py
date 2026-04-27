@@ -16,9 +16,9 @@ h3 {text-align:center; color:#555;}
 
 # 🔐 USUARIOS
 usuarios = {
-    "juan": {"password": "1234", "oficina": "Comercial"},
+    "Juan": {"password": "1234", "oficina": "Comercial"},
     "Marco_Panty": {"password": "abcd", "oficina": "mantenimiento"},
-    "marco": {"password": "5678", "oficina": "Logistica"}
+    "Marco": {"password": "5678", "oficina": "Logistica"}
 }
 
 # 🔹 CONEXIÓN GOOGLE SHEETS
